@@ -1,5 +1,14 @@
+import 'package:firebase_storage/firebase_storage.dart';
+
+/// Storage Reference to Hash
+int storageRefToHash(Reference storageRef) {
+  String string = storageRef.fullPath;
+
+  return stringToHash(string);
+}
+
 /// Create an ID for the Isar database out of the Firebase Storage Reference
-int stringToIsarHash(String string) {
+int stringToHash(String string) {
   var hash = 0xcbf29ce484222325;
 
   var i = 0;

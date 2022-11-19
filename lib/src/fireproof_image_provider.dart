@@ -82,13 +82,23 @@ class FireproofImage extends ImageProvider<FireproofImage> {
   ) async {
     try {
       assert(key == this);
+      // For debug stats
+      late DateTime debugCacheStart;
+      late DateTime debugCacheEnd;
+      late DateTime debugFirebaseStorageStart;
+      late DateTime debugFirebaseStorageEnd;
 
       // TODO: First check if the image is in cache and if it's not expired
+      debugCacheStart = DateTime.now();
+      final Uint8List? cachedBytes = await CachedData.getFromCache(storageRef);
+      debugCacheEnd = DateTime.now();
 
       // TODO: If not in cache or expired, fetch the data from Firebase Storage AND cache the data with isar
 
       // Fetch the data from Firebase Storage
-      final Uint8List? bytes = await storageRef.getData(maxSize);
+      debugFirebaseStorageStart = DateTime.now();
+      final Uint8List? bytes = cachedBytes ?? await storageRef.getData(maxSize);
+      debugFirebaseStorageEnd = DateTime.now();
 
       if (bytes == null) {
         throw Exception('FireproofImage getData() returned null.');
@@ -103,6 +113,11 @@ class FireproofImage extends ImageProvider<FireproofImage> {
       }
 
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+
+      debugPrint(
+          "Cache stage duration (null? ${(cachedBytes == null)}): ${debugCacheEnd.difference(debugCacheStart).inMilliseconds}ms");
+      debugPrint(
+          "Firebase storage stage duration (null? ${!(cachedBytes == null)}): ${debugFirebaseStorageEnd.difference(debugFirebaseStorageStart).inMilliseconds}ms");
       return decode(buffer);
     } catch (e) {
       // Depending on where the exception was thrown, the image cache may not

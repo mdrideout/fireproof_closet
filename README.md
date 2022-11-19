@@ -18,6 +18,8 @@ database to store and manage the data in persistence.
 # Implementation
 **Initialize Fireproof Closet at app startup**
 ```dart
+import 'package:fireproof_closet/fireproof_closet.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -28,22 +30,22 @@ void main() async {
 
   // Initialize Firebase Storage Image Caching
   await FireproofCloset.initialize();
-
-  ...
+  
+  // ...
 }
 ```
 
 Example showing firebase storage reference in FireproofImage image provider.
 ```dart
 
-Example here.
+// Example here
 
 ```
 
 Example showing a loop precaching all images in a container
 ```dart
 
-Example here.
+// Example here.
 
 ```
 
