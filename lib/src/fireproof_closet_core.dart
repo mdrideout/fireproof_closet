@@ -40,4 +40,7 @@ class FireproofCloset {
     await Hive.openLazyBox<CachedData>(kDatabaseName);
     return;
   }
+
+  /// Eternally callable functions
+  static void clearCache() => CachedData.clearCache();
 }
