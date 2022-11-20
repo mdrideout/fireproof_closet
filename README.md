@@ -60,11 +60,18 @@ void main() async {
   );
 
   // Initialize Firebase Storage Image Caching
-  await FireproofCloset.initialize();
+  FireproofCloset fireproofCloset = FireproofCloset(
+    debugMode: true, // Default is false
+    defaultDuration: const Duration(days: 7), // Default is 365 days
+  );
+  await fireproofCloset.initialize();
   
   // ...
 }
 ```
+
+- **debugMode**: In development builds, will log performance data and activity of caching to the console.
+- **defaultDuration**: How long all caches should persist before expiring, by default
 
 Example showing firebase storage reference in FireproofImage image provider.
 ```dart

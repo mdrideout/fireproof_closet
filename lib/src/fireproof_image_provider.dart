@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'cached_data.dart';
+import 'fireproof_closet_core.dart';
 
 /// Loads from cloud or cache a given Firebase Storage [Reference] as Uint8List
 ///
@@ -88,17 +89,24 @@ class FireproofImage extends ImageProvider<FireproofImage> {
       late DateTime debugFirebaseStorageStart;
       late DateTime debugFirebaseStorageEnd;
 
-      // TODO: First check if the image is in cache and if it's not expired
-      debugCacheStart = DateTime.now();
-      final Uint8List? cachedBytes = await CachedData.getFromCache(storageRef);
-      debugCacheEnd = DateTime.now();
+      bool debugMode = FireproofCloset().debugMode ?? false;
 
-      // TODO: If not in cache or expired, fetch the data from Firebase Storage AND cache the data with isar
+      // TODO: First check if the image is in cache and if it's not expired
+      if (debugMode) debugCacheStart = DateTime.now();
+      final Uint8List? cachedBytes = await CachedData.getFromCache(storageRef);
+      if (debugMode) debugCacheEnd = DateTime.now();
+
+      // TODO: If not in cache or expired, fetch the data from Firebase Storage AND cache the data
 
       // Fetch the data from Firebase Storage
-      debugFirebaseStorageStart = DateTime.now();
+      if (debugMode) debugFirebaseStorageStart = DateTime.now();
       final Uint8List? bytes = cachedBytes ?? await storageRef.getData(maxSize);
-      debugFirebaseStorageEnd = DateTime.now();
+      if (debugMode) debugFirebaseStorageEnd = DateTime.now();
+
+      if (debugMode) {
+        debugPrint("Cache stage : ${debugCacheEnd.difference(debugCacheStart).inMilliseconds}ms");
+        debugPrint("Firebase stage: ${debugFirebaseStorageEnd.difference(debugFirebaseStorageStart).inMilliseconds}ms");
+      }
 
       if (bytes == null) {
         throw Exception('FireproofImage getData() returned null.');
@@ -108,16 +116,14 @@ class FireproofImage extends ImageProvider<FireproofImage> {
         throw Exception('FireproofImage is an empty file. 0 Bytes returned.');
       }
 
-      if (cache) {
+      // Cache the data if cachedBytes was null and cache == true
+      if (cachedBytes == null && cache) {
+        if (debugMode) debugPrint("Caching: ${storageRef.fullPath}");
         CachedData.cacheBytes(storageRef: storageRef, bytes: bytes);
       }
 
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
 
-      debugPrint(
-          "Cache stage duration (null? ${(cachedBytes == null)}): ${debugCacheEnd.difference(debugCacheStart).inMilliseconds}ms");
-      debugPrint(
-          "Firebase storage stage duration (null? ${!(cachedBytes == null)}): ${debugFirebaseStorageEnd.difference(debugFirebaseStorageStart).inMilliseconds}ms");
       return decode(buffer);
     } catch (e) {
       // Depending on where the exception was thrown, the image cache may not

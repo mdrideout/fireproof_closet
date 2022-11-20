@@ -26,23 +26,29 @@ class CachedData {
   @HiveField(3)
   final DateTime cacheExpires;
 
+  @override
+  String toString() {
+    return "CachedData: fullPath: $storageRefFullPath, size: ${(bytes.lengthInBytes / 1000).toStringAsFixed(2)} kb, created: $cacheCreated, expires: $cacheExpires";
+  }
+
   /// Get Bytes consumable by the FireproofImage ImageProvider from cache
   /// Returns null if they are not in the cache
   static Future<Uint8List?> getFromCache(Reference storageRef) async {
+    bool debugMode = FireproofCloset().debugMode ?? false;
     LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
 
     final CachedData? cachedData = await box.get(storageRef.fullPath);
 
     if (cachedData == null) {
-      debugPrint("Not found in cache: ${storageRef.fullPath}");
+      if (debugMode) debugPrint("Not found in cache: ${storageRef.fullPath}");
       return null;
     }
-    debugPrint("Found in cache: ${storageRef.fullPath}");
+    if (debugMode) debugPrint("Found in cache: ${storageRef.fullPath}");
 
     // If we are past the expiration date
     DateTime now = DateTime.now();
     if (now.isAfter(cachedData.cacheExpires)) {
-      debugPrint("Cache expired at ${cachedData.cacheExpires} and it is now $now, returning null.");
+      if (debugMode) debugPrint("Cache expired at ${cachedData.cacheExpires} and it is now $now, returning null.");
       return null;
     }
 
@@ -58,6 +64,7 @@ class CachedData {
     required Uint8List bytes,
     Duration cacheDuration = const Duration(minutes: 5),
   }) async {
+    bool debugMode = FireproofCloset().debugMode ?? false;
     LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
 
     // Create cacheCreated datetime
@@ -72,6 +79,8 @@ class CachedData {
     // Write the data
     await box.put(storageRef.fullPath, cachedData);
 
+    if (debugMode) debugPrint("Cached: ${cachedData.toString()}");
+
     return;
   }
 
@@ -84,7 +93,7 @@ class CachedData {
     required Reference storageRef,
     Duration cacheDuration = const Duration(minutes: 5),
   }) async {
-    Box<CachedData> box = Hive.box<CachedData>(FireproofCloset.kDatabaseName);
+    LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
 
     // Download the image from Firebase Storage based on the reference
     // TODO:
@@ -107,4 +116,22 @@ class CachedData {
     // Return it to the UI
     return cachedData;
   }
+
+  /// Clear Cache
+  /// Deletes all cached items from the cache
+  static Future<void> clearCache() async {
+    bool debugMode = FireproofCloset().debugMode ?? false;
+    LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
+    await box.deleteAll(box.keys);
+    if (debugMode) debugPrint("Cache deleted");
+    return;
+  }
+
+  /// Cache Status
+  /// Details about the cache
+  static void cacheStatus() {}
+
+  /// Print Cache Items
+  /// Print all of the items currently in cache
+  static void printCacheItems() {}
 }

@@ -8,6 +8,7 @@ import 'cached_data.dart';
 /// Instance parameters can only be set if they are null, and will use default values from the Factory constructor
 class FireproofCloset {
   bool? debugMode;
+  Duration? defaultDuration;
 
   /// Always return a singleton instance
   static final FireproofCloset _instance = FireproofCloset._internal();
@@ -16,9 +17,10 @@ class FireproofCloset {
   FireproofCloset._internal();
 
   /// Consumable Constructor
-  factory FireproofCloset({bool debugMode = false}) {
+  factory FireproofCloset({bool debugMode = false, defaultDuration = const Duration(days: 365)}) {
     // Set null class parameters
     _instance.debugMode ??= debugMode;
+    _instance.defaultDuration ??= defaultDuration;
 
     return _instance;
   }
