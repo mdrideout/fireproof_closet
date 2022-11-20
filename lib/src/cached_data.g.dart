@@ -20,7 +20,7 @@ const CachedDataSchema = CollectionSchema(
     r'bytes': PropertySchema(
       id: 0,
       name: r'bytes',
-      type: IsarType.longList,
+      type: IsarType.byteList,
     ),
     r'cacheCreated': PropertySchema(
       id: 1,
@@ -58,7 +58,7 @@ int _cachedDataEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.bytes.length * 8;
+  bytesCount += 3 + object.bytes.length;
   bytesCount += 3 + object.storageRefFullPath.length * 3;
   return bytesCount;
 }
@@ -69,7 +69,7 @@ void _cachedDataSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLongList(offsets[0], object.bytes);
+  writer.writeByteList(offsets[0], object.bytes);
   writer.writeDateTime(offsets[1], object.cacheCreated);
   writer.writeDateTime(offsets[2], object.cacheExpires);
   writer.writeString(offsets[3], object.storageRefFullPath);
@@ -83,7 +83,7 @@ CachedData _cachedDataDeserialize(
 ) {
   final object = CachedData(
     reader.readString(offsets[3]),
-    reader.readLongList(offsets[0]) ?? [],
+    reader.readByteList(offsets[0]) ?? [],
     reader.readDateTime(offsets[1]),
     reader.readDateTime(offsets[2]),
   );
@@ -98,7 +98,7 @@ P _cachedDataDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLongList(offset) ?? []) as P;
+      return (reader.readByteList(offset) ?? []) as P;
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:

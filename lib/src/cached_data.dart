@@ -19,7 +19,7 @@ class CachedData {
   Id get id => stringToHash(storageRefFullPath);
 
   /// The bytes stored
-  final List<int> bytes;
+  final List<byte> bytes;
 
   /// Cache created
   final DateTime cacheCreated;

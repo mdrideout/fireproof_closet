@@ -15,6 +15,31 @@ database to store and manage the data in persistence.
 - [Isar](https://github.com/isar/isar) is a Rust-based database that has blazingly fast speeds on all Flutter platforms.
 - The rest of the Fireproof Closet system is written in Dart which is inherently cross-platform
 
+### Speed Example
+Loading images from cache vs downloading on iOS.
+
+First cache read after the database is initialized may be slower. Cache reads below are for subsequent reads. 
+
+#### 70 KB Image
+- **Not found in cache, downloading from Firebase Storage**
+  - Cache stage duration: ~30 - 50ms
+  - Firebase storage stage duration: 338ms
+
+
+- **Loaded from cache**
+    - Cache stage duration: 11ms
+    - Firebase storage stage duration: 0ms
+
+#### 7 MB Image
+- **Not found in cache, downloading from Firebase Storage**
+    - Cache stage duration: ~30 - 50ms
+    - Firebase storage stage duration: 913ms
+
+
+- **Loaded from cache**
+    - Cache stage duration: 21ms
+    - Firebase storage stage duration: 0ms
+
 # Implementation
 **Initialize Fireproof Closet at app startup**
 ```dart
@@ -37,9 +62,23 @@ void main() async {
 
 Example showing firebase storage reference in FireproofImage image provider.
 ```dart
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:fireproof_closet/fireproof_closet.dart';
 
-// Example here
+class TestWidget extends StatelessWidget {
+  const TestWidget({Key? key}) : super(key: key);
 
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      image: FireproofImage(
+        storageRef: FirebaseStorage.instance
+            .ref()
+            .child("bucket-name/file-name.jpeg"), // The full relative path to the image
+      ),
+    );
+  }
+}
 ```
 
 Example showing a loop precaching all images in a container
@@ -52,4 +91,6 @@ Example showing a loop precaching all images in a container
 ---
 
 # Limitations
+The same [limitations for Isar](https://isar.dev/limitations.html) exist for this package.
+
 - Max single image storage size is 16MB

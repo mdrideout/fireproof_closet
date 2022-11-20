@@ -9,7 +9,7 @@ int storageRefToHash(Reference storageRef) {
 
 /// Create an ID for the Isar database out of the Firebase Storage Reference
 int stringToHash(String string) {
-  var hash = 0xcbf29ce484222325;
+  int hash = 0xcbf29ce484222325;
 
   var i = 0;
   while (i < string.length) {
