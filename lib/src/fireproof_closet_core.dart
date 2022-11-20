@@ -2,12 +2,32 @@ import 'package:hive_flutter/adapters.dart';
 
 import 'cached_data.dart';
 
+/// FireproofCloset - Singleton Implementation
+/// Constructs a single _instance
+/// Factory constructor always returns the same instance
+/// Instance parameters can only be set if they are null, and will use default values from the Factory constructor
 class FireproofCloset {
+  bool? debugMode;
+
+  /// Always return a singleton instance
+  static final FireproofCloset _instance = FireproofCloset._internal();
+
+  /// Internal Constructor
+  FireproofCloset._internal();
+
+  /// Consumable Constructor
+  factory FireproofCloset({bool debugMode = false}) {
+    // Set null class parameters
+    _instance.debugMode ??= debugMode;
+
+    return _instance;
+  }
+
   /// Isar database name
   static const String kDatabaseName = "fireproof_closet";
 
   /// Initialize the cache by opening the database with our data schemes (generated from @collection classes)
-  static Future<void> initialize() async {
+  Future<void> initialize() async {
     // Init Hive
     await Hive.initFlutter();
 
