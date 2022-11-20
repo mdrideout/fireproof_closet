@@ -22,22 +22,22 @@ First cache read after the database is initialized may be slower. Cache reads be
 
 #### 70 KB Image
 - **Not found in cache, downloading from Firebase Storage**
-  - Cache stage duration: ~30 - 50ms
+  - Cache stage duration: ~45ms
   - Firebase storage stage duration: 338ms
 
 
 - **Loaded from cache**
-    - Cache stage duration: 11ms
+    - Cache stage duration: ~11ms
     - Firebase storage stage duration: 0ms
 
 #### 7 MB Image
 - **Not found in cache, downloading from Firebase Storage**
-    - Cache stage duration: ~30 - 50ms
+    - Cache stage duration: ~45ms
     - Firebase storage stage duration: 913ms
 
 
 - **Loaded from cache**
-    - Cache stage duration: 21ms
+    - Cache stage duration: ~60ms
     - Firebase storage stage duration: 0ms
 
 # Implementation

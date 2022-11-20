@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:hive_flutter/adapters.dart';
 
 import 'cached_data.dart';
 
@@ -8,7 +8,14 @@ class FireproofCloset {
 
   /// Initialize the cache by opening the database with our data schemes (generated from @collection classes)
   static Future<void> initialize() async {
-    await Isar.open([CachedDataSchema], name: kDatabaseName);
+    // Init Hive
+    await Hive.initFlutter();
+
+    // Register Type Adapter
+    Hive.registerAdapter(CachedDataAdapter());
+
+    // Open the database
+    await Hive.openLazyBox<CachedData>(kDatabaseName);
     return;
   }
 }
