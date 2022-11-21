@@ -117,7 +117,7 @@ FireproofCloset.clearCache();
 FireproofCloset.cacheStatus();
 ```
 
-**Example Output**
+*Example Output*
 ```bash
 flutter: Number of cached items: 1
 flutter: Total cache size 0.0689 MB
@@ -130,7 +130,7 @@ flutter: Total cache size 0.0689 MB
 FireproofCloset.printCacheItems();
 ```
 
-**Example Output**
+*Example Output*
 ```bash
 flutter: =====================
 flutter: All cached items:
