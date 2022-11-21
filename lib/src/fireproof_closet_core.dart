@@ -42,5 +42,13 @@ class FireproofCloset {
   }
 
   /// Eternally callable functions
+
+  /// Clear the cache
   static void clearCache() => CachedData.clearCache();
+
+  /// Get the cache status
+  static void cacheStatus() => CachedData.cacheStatus();
+
+  /// Print everything in the cache
+  static void printCacheItems() => CachedData.printCacheItems();
 }

@@ -100,3 +100,41 @@ Example showing a loop precaching all images in a container
 // Example here.
 
 ```
+
+## Helpful Utilities
+
+#### Clear the cache
+
+```dart
+// Delete all items from the cache
+FireproofCloset.clearCache();
+```
+
+#### Print Cache Status
+
+```dart
+// Delete all items from the cache
+FireproofCloset.cacheStatus();
+```
+
+**Example Output**
+```bash
+flutter: Number of cached items: 1
+flutter: Total cache size 0.0689 MB
+```
+
+#### Print Cache Items
+
+```dart
+// Delete all items from the cache
+FireproofCloset.printCacheItems();
+```
+
+**Example Output**
+```bash
+flutter: =====================
+flutter: All cached items:
+flutter: 0 CachedData: fullPath: full/path/to/image.jpg, size: 68.87 kb, created: 2022-11-20 20:19:04.624, expires: 2022-11-20 20:24:04.624
+flutter: End of cached items.
+flutter: =====================
+```

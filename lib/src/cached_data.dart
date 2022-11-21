@@ -129,9 +129,50 @@ class CachedData {
 
   /// Cache Status
   /// Details about the cache
-  static void cacheStatus() {}
+  static Future<void> cacheStatus() async {
+    LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
+    var keys = box.keys;
+
+    debugPrint("Number of cached items: ${keys.length}");
+
+    List<Future<CachedData?>> futures = keys.map((item) {
+      return box.get(item);
+    }).toList();
+
+    List<CachedData?> items = await Future.wait<CachedData?>(futures);
+
+    int totalCacheFileSize = 0;
+
+    for (var item in items) {
+      if (item != null) {
+        totalCacheFileSize += item.bytes.lengthInBytes;
+      }
+    }
+
+    debugPrint("Total cache size ${(totalCacheFileSize / 1000 / 1000).toStringAsFixed(4)} MB");
+  }
 
   /// Print Cache Items
   /// Print all of the items currently in cache
-  static void printCacheItems() {}
+  static void printCacheItems() async {
+    LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
+    var keys = box.keys;
+
+    List<Future<CachedData?>> futures = keys.map((item) {
+      return box.get(item);
+    }).toList();
+
+    List<CachedData?> items = await Future.wait<CachedData?>(futures);
+
+    int count = 0;
+
+    debugPrint("=====================\nAll cached items:");
+    for (var item in items) {
+      if (item != null) {
+        debugPrint("$count ${item.toString()}");
+        count++;
+      }
+    }
+    debugPrint("End of cached items.\n=====================");
+  }
 }
