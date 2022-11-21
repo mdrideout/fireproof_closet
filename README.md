@@ -73,7 +73,10 @@ void main() async {
 - **debugMode**: In development builds, will log performance data and activity of caching to the console.
 - **defaultDuration**: How long all caches should persist before expiring, by default
 
-Example showing firebase storage reference in FireproofImage image provider.
+## Display An Image
+
+FireproofImage is an image provider that can be provided to an Image widget, or
+any widget that takes an image provider.
 ```dart
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fireproof_closet/fireproof_closet.dart';
@@ -94,14 +97,21 @@ class TestWidget extends StatelessWidget {
 }
 ```
 
-Example showing a loop precaching all images in a container
+## Precache Images
+
+Download images before they need to be shown to improve the user experience. 
+
+This is helpful for long scrolling `ListView.builder()` type widgets, where you do not 
+want to wait for each image to download from Firebase Storage as it is scrolled into view.
 ```dart
 
 // Example here.
 
 ```
 
-## Helpful Utilities
+---
+
+# Helpful Utilities
 
 #### Clear the cache
 
