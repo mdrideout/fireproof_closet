@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:fireproof_closet/src/constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -91,14 +92,12 @@ class FireproofImage extends ImageProvider<FireproofImage> {
 
       bool debugMode = FireproofCloset().debugMode ?? false;
 
-      // TODO: First check if the image is in cache and if it's not expired
+      // First check if the image is in cache and if it's not expired
       if (debugMode) debugCacheStart = DateTime.now();
       final Uint8List? cachedBytes = await CachedData.getFromCache(storageRef);
       if (debugMode) debugCacheEnd = DateTime.now();
 
-      // TODO: If not in cache or expired, fetch the data from Firebase Storage AND cache the data
-
-      // Fetch the data from Firebase Storage
+      // If not in cache or expired, fetch the data from Firebase Storage AND cache the data
       if (debugMode) debugFirebaseStorageStart = DateTime.now();
       final Uint8List? bytes = cachedBytes ?? await storageRef.getData(maxSize);
       if (debugMode) debugFirebaseStorageEnd = DateTime.now();
@@ -119,7 +118,7 @@ class FireproofImage extends ImageProvider<FireproofImage> {
       // Cache the data if cachedBytes was null and cache == true
       if (cachedBytes == null && cache) {
         if (debugMode) debugPrint("Caching: ${storageRef.fullPath}");
-        CachedData.cacheBytes(storageRef: storageRef, bytes: bytes);
+        CachedData.cacheBytes(storageRef: storageRef, bytes: bytes, cacheDuration: kDefaultDuration);
       }
 
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);

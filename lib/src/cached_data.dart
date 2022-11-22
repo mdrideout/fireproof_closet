@@ -3,6 +3,8 @@ import 'package:fireproof_closet/fireproof_closet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
+import 'constants.dart';
+
 part 'cached_data.g.dart';
 
 /// Data saved in a format compatible with isar database
@@ -62,7 +64,7 @@ class CachedData {
   static Future<void> cacheBytes({
     required Reference storageRef,
     required Uint8List bytes,
-    Duration cacheDuration = const Duration(minutes: 5),
+    Duration cacheDuration = kDefaultDuration,
   }) async {
     bool debugMode = FireproofCloset().debugMode ?? false;
     LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
@@ -85,36 +87,26 @@ class CachedData {
   }
 
   /// Download And Cache
-  /// Downloads the byte data from Firebase Storage
-  /// and caches it locally for future use.
-  ///
-  /// The default [duration] is 5 minutes.
-  static Future<CachedData> downloadAndCache({
+  static Future<Uint8List> downloadAndCache({
     required Reference storageRef,
-    Duration cacheDuration = const Duration(minutes: 5),
+    Duration? cacheDuration = kDefaultDuration,
   }) async {
-    LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
+    try {
+      // Download the image from Firebase Storage based on the reference
+      final Uint8List? bytes = await storageRef.getData();
 
-    // Download the image from Firebase Storage based on the reference
-    // TODO:
+      if (bytes == null) {
+        throw Exception("downloadAndCache() failed for ${storageRef.fullPath}.");
+      }
 
-    // Convert to bytes for caching
-    Uint8List bytes = Uint8List(10);
+      // Save it to locale persistent cache
+      cacheBytes(storageRef: storageRef, bytes: bytes, cacheDuration: cacheDuration ?? kDefaultDuration);
 
-    // Create cacheCreated datetime
-    DateTime now = DateTime.now();
-
-    // Create an expiration from the duration
-    DateTime expires = now.add(cacheDuration);
-
-    // Construct the entire cache object
-    CachedData cachedData = CachedData(storageRef.fullPath, bytes, now, expires);
-
-    // Save it to locale persistent cache
-    // TODO:
-
-    // Return it to the UI
-    return cachedData;
+      // Return the bytes
+      return bytes;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Clear Cache

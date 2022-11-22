@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import 'cached_data.dart';
+import 'constants.dart';
 
 /// FireproofCloset - Singleton Implementation
 /// Constructs a single _instance
@@ -17,7 +21,7 @@ class FireproofCloset {
   FireproofCloset._internal();
 
   /// Consumable Constructor
-  factory FireproofCloset({bool debugMode = false, defaultDuration = const Duration(days: 365)}) {
+  factory FireproofCloset({bool debugMode = false, defaultDuration = kDefaultDuration}) {
     // Set null class parameters
     _instance.debugMode ??= debugMode;
     _instance.defaultDuration ??= defaultDuration;
@@ -42,6 +46,14 @@ class FireproofCloset {
   }
 
   /// Eternally callable functions
+
+  /// Download And Cache
+  /// Downloads the byte data from Firebase Storage
+  /// and caches it locally for future use.
+  ///
+  /// Default cache duration: [kDefaultDuration]
+  static Future<Uint8List> downloadAndCache(Reference storageRef, {Duration? cacheDuration}) =>
+      CachedData.downloadAndCache(storageRef: storageRef, cacheDuration: cacheDuration);
 
   /// Clear the cache
   static void clearCache() => CachedData.clearCache();
