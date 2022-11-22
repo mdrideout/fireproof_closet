@@ -90,23 +90,41 @@ class TestWidget extends StatelessWidget {
       image: FireproofImage(
         storageRef: FirebaseStorage.instance
             .ref()
-            .child("bucket-name/file-name.jpeg"), // The full relative path to the image
+            .child("full/path/to/image.jpg"), // The full relative path to the image
       ),
     );
   }
 }
 ```
 
-## Precache Images
+## Precache Images (or files)
 
-Download images before they need to be shown to improve the user experience. 
+Download images before they need to be shown to improve the user experience.
+
+_(This also works with any file, and not just images.)_
 
 This is helpful for long scrolling `ListView.builder()` type widgets, where you do not 
-want to wait for each image to download from Firebase Storage as it is scrolled into view.
+want to wait for each image to download from Firebase Storage as it is scrolled into view. Load
+it from the cache in milliseconds instead.
+
+Optionally, `await` these downloads.
 ```dart
+FireproofCloset.downloadAndCache(FirebaseStorage.instance.ref().child("full/path/to/image.jpg"));
+```
 
-// Example here.
+**Precache a ton of images at a time**
+```dart
+// A list of Firebase Storage References
+List<Reference> files = [
+  FirebaseStorage.instance.ref().child("full/path/to/image.jpg"),
+  FirebaseStorage.instance.ref().child("full/path/to/image1.jpg"),
+  FirebaseStorage.instance.ref().child("full/path/to/image2.jpg"),
+];
 
+// Cache them all at once in a loop
+for(var file in files) {
+  FireproofCloset.downloadAndCache(file);
+}
 ```
 
 ---
@@ -114,16 +132,17 @@ want to wait for each image to download from Firebase Storage as it is scrolled 
 # Helpful Utilities
 
 #### Clear the cache
+Delete all items from the cache
 
 ```dart
-// Delete all items from the cache
 FireproofCloset.clearCache();
 ```
+
+---
 
 #### Print Cache Status
 
 ```dart
-// Delete all items from the cache
 FireproofCloset.cacheStatus();
 ```
 
@@ -133,10 +152,11 @@ flutter: Number of cached items: 1
 flutter: Total cache size 0.0689 MB
 ```
 
+---
+
 #### Print Cache Items
 
 ```dart
-// Delete all items from the cache
 FireproofCloset.printCacheItems();
 ```
 
