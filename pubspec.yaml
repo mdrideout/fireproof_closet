@@ -1,6 +1,6 @@
 name: fireproof_closet
 description: Cache your Firebase Storage images to the Fireproof Closet for blazingly fast access.
-version: 0.0.1
+version: 0.90.1
 homepage:
 
 environment:
