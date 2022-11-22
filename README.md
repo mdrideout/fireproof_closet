@@ -45,6 +45,7 @@ In the future, Hive will be replaced with [Isar](https://pub.dev/packages/isar) 
 native code for each platform. However, [Web does not currently work properly](https://github.com/isar/isar/issues/686).
 
 - Isar loads large images approximately 3x faster (7 MB in ~20ms) but the difference is negligible on smaller images under 1 MB.
+- This upgrade should be a non-breaking change since the API will remain identical, but with a higher speed database behind the scenes.
 
 # Implementation
 **Initialize Fireproof Closet at app startup**
