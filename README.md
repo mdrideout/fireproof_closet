@@ -75,9 +75,6 @@ void main() async {
 }
 ```
 
-- **debugMode**: In development builds, will log performance data and activity of caching to the console.
-- **defaultDuration**: How long all caches should persist before expiring, by default
-
 ## Display An Image
 
 FireproofImage is an image provider that can be provided to an Image widget, or

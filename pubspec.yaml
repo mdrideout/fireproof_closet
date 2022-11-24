@@ -1,6 +1,6 @@
 name: fireproof_closet
 description: Cache your Firebase Storage images to the Fireproof Closet for blazingly fast access.
-version: 0.91.0
+version: 0.91.1
 homepage: https://github.com/mdrideout/fireproof_closet
 repository: https://github.com/mdrideout/fireproof_closet
 
