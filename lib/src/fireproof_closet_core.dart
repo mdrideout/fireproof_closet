@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import 'cached_data.dart';
@@ -11,26 +10,8 @@ import 'constants.dart';
 /// Factory constructor always returns the same instance
 /// Instance parameters can only be set if they are null, and will use default values from the Factory constructor
 class FireproofCloset {
-  Duration? defaultDuration;
-
-  /// Always return a singleton instance
-  static final FireproofCloset _instance = FireproofCloset._internal();
-
-  /// Internal Constructor
-  FireproofCloset._internal();
-
-  /// Consumable Constructor
-  factory FireproofCloset({defaultDuration = kDefaultDuration}) {
-    _instance.defaultDuration ??= defaultDuration;
-
-    return _instance;
-  }
-
-  /// Isar database name
-  static const String kDatabaseName = "fireproof_closet";
-
   /// Initialize the cache by opening the database with our data schemes (generated from @collection classes)
-  Future<void> initialize() async {
+  static Future<void> initialize() async {
     // Init Hive
     await Hive.initFlutter();
 
@@ -42,15 +23,28 @@ class FireproofCloset {
     return;
   }
 
-  /// Eternally callable functions
-
   /// Download And Cache
   /// Downloads the byte data from Firebase Storage
   /// and caches it locally for future use.
   ///
+  /// [storageRef] is the Firebase Storage [Reference] object with the full relative path to the file
+  ///
   /// Default cache duration: [kDefaultDuration]
-  static Future<Uint8List> downloadAndCache(Reference storageRef, {Duration? cacheDuration}) =>
-      CachedData.downloadAndCache(storageRef: storageRef, cacheDuration: cacheDuration);
+  ///
+  /// If [breakCache] is true, downloadAndCache will perform a fresh download even if the image is already in cache.
+  /// to invalidate the [ImageCache] hot memory ImageProvider singleton cache.
+  static Future<void> downloadAndCache(
+    Reference storageRef, {
+    BuildContext? context,
+    Duration cacheDuration = kDefaultDuration,
+    bool breakCache = false,
+  }) =>
+      CachedData.downloadAndCache(
+        context: context,
+        storageRef: storageRef,
+        cacheDuration: cacheDuration,
+        breakCache: breakCache,
+      );
 
   /// Clear the cache
   static void clearCache() => CachedData.clearCache();

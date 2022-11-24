@@ -6,19 +6,27 @@ image provider, your image will be loaded instantly from the cache, or it will b
 The Fireproof Closet cache is persistent, so users can close and re-open the app
 and not have to wait for images to download again.
 
+### In-Memory Speed
+Images displayed with the FireproofImage() provider are kept in the hot memory ImageCache for instant loading.
+
+
 ### How it Works
 Fireproof Closet is a combination of a custom ImageProvider called `FireproofImage` which
 is capable of acquiring and caching images from Firebase Storage, and the [Hive](https://pub.dev/packages/hive)
-database to store and manage the data in persistence.
+database to store and manage the data in persistence. Images are loaded into the hot memory ImageCache when displayed with
+the FireproofImage() provider, or ahead of time with pre-caching by using `FireproofCloset.downloadAndCache(context, storageRef);`.
 
 ### Cross Platform
 - [Hive](https://pub.dev/packages/hive) is a cross-platform database that has fast speeds on all Flutter platforms.
 - The rest of the Fireproof Closet system is written in Dart which is inherently cross-platform
 
 ### Speed Example
-Loading images from cache vs downloading on iOS.
+Loading images from persistent cache vs downloading from Firebase Storage on iOS.
 
-First cache read after the database is initialized may be slower. Cache reads below are for subsequent reads. 
+First cache read after the database is initialized may be slower. Cache reads below are for subsequent reads.
+
+_After reading from persistent cache, the image is stored in hot memory for instant loading. The following reflects speed improvements
+compared to Firebase Storage downloading._
 
 #### 70 KB Image
 - **Not found in cache, downloading from Firebase Storage**
@@ -44,7 +52,7 @@ First cache read after the database is initialized may be slower. Cache reads be
 In the future, Hive will be replaced with [Isar](https://pub.dev/packages/isar) which is a cross-platform database that uses
 native code for each platform. However, [Web does not currently work properly](https://github.com/isar/isar/issues/686).
 
-- Isar loads large images approximately 3x faster (7 MB in ~20ms) but the difference is negligible on smaller images under 1 MB.
+- Isar loads large images into memory from persistent storage approximately 3x faster (7 MB in ~20ms) but the difference is negligible on smaller images under 1 MB.
 - This upgrade should be a non-breaking change since the API will remain identical, but with a higher speed database behind the scenes.
 
 # Implementation
@@ -61,11 +69,7 @@ void main() async {
   );
 
   // Initialize Firebase Storage Image Caching
-  FireproofCloset fireproofCloset = FireproofCloset(
-    debugMode: true, // Default is false
-    defaultDuration: const Duration(days: 7), // Default is 365 days
-  );
-  await fireproofCloset.initialize();
+  await FireproofCloset.initialize();
   
   // ...
 }
@@ -90,8 +94,11 @@ class TestWidget extends StatelessWidget {
     return Image(
       image: FireproofImage(
         storageRef: FirebaseStorage.instance
-            .ref()
-            .child("full/path/to/image.jpg"), // The full relative path to the image
+                .ref()
+                .child("full/path/to/image.jpg"), // Required, the full relative path to the image in Firebase Storage
+        breakCache: true, // Optional, defaults to false, will force a fresh download and evict the image from memory
+        cacheDuration: const Duration(minutes: 5), // Optional, defaults to 365 days
+        cache: false, // Optional, defaults to true. If false, will not save the image to persistent cache
       ),
     );
   }
@@ -123,8 +130,9 @@ List<Reference> files = [
 ];
 
 // Cache them all at once in a loop
-for(var file in files) {
-  FireproofCloset.downloadAndCache(file);
+// If context is null, images will only be downloaded to persistence and not loaded into hot memory [ImageCache]
+for (var file in files) {
+  FireproofCloset.downloadAndCache(storageRef, context: context);
 }
 ```
 

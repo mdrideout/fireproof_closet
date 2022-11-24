@@ -19,7 +19,7 @@ class FireproofImage extends ImageProvider<FireproofImage> {
   /// The arguments must not be null.
   const FireproofImage({
     required this.storageRef,
-    this.cacheDuration = const Duration(minutes: 5),
+    this.cacheDuration = kDefaultDuration,
     this.cache = true,
     this.breakCache = false,
     this.scale = 1.0,
@@ -75,8 +75,13 @@ class FireproofImage extends ImageProvider<FireproofImage> {
     try {
       assert(key == this);
 
-      // First attempt to retrieve the image from cache
-      final Uint8List? cachedBytes = await CachedData.getFromCache(storageRef);
+      // Evict from hot cache if we're breaking cache
+      if (breakCache) {
+        evict();
+      }
+
+      // First attempt to retrieve the image from cache (unless breakCache)
+      final Uint8List? cachedBytes = (breakCache) ? null : await CachedData.getFromCache(storageRef);
 
       // If not in cache or expired, fetch the data from Firebase Storage
       final Uint8List? bytes = cachedBytes ?? await storageRef.getData(maxSize);
@@ -91,7 +96,7 @@ class FireproofImage extends ImageProvider<FireproofImage> {
 
       // Cache the data if cachedBytes was null and cache == true
       if (cachedBytes == null && cache) {
-        CachedData.cacheBytes(storageRef: storageRef, bytes: bytes, cacheDuration: kDefaultDuration);
+        CachedData.saveToPersistentCache(storageRef: storageRef, bytes: bytes, cacheDuration: cacheDuration);
       }
 
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
@@ -114,6 +119,7 @@ class FireproofImage extends ImageProvider<FireproofImage> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
+
     return other is FireproofImage && other.storageRef.fullPath == storageRef.fullPath && other.scale == scale;
   }
 
