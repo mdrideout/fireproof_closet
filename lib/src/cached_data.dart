@@ -36,21 +36,17 @@ class CachedData {
   /// Get Bytes consumable by the FireproofImage ImageProvider from cache
   /// Returns null if they are not in the cache
   static Future<Uint8List?> getFromCache(Reference storageRef) async {
-    bool debugMode = FireproofCloset().debugMode ?? false;
     LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
 
     final CachedData? cachedData = await box.get(storageRef.fullPath);
 
     if (cachedData == null) {
-      if (debugMode) debugPrint("Not found in cache: ${storageRef.fullPath}");
       return null;
     }
-    if (debugMode) debugPrint("Found in cache: ${storageRef.fullPath}");
 
     // If we are past the expiration date
     DateTime now = DateTime.now();
     if (now.isAfter(cachedData.cacheExpires)) {
-      if (debugMode) debugPrint("Cache expired at ${cachedData.cacheExpires} and it is now $now, returning null.");
       return null;
     }
 
@@ -66,7 +62,6 @@ class CachedData {
     required Uint8List bytes,
     Duration cacheDuration = kDefaultDuration,
   }) async {
-    bool debugMode = FireproofCloset().debugMode ?? false;
     LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
 
     // Create cacheCreated datetime
@@ -80,8 +75,6 @@ class CachedData {
 
     // Write the data
     await box.put(storageRef.fullPath, cachedData);
-
-    if (debugMode) debugPrint("Cached: ${cachedData.toString()}");
 
     return;
   }
@@ -112,10 +105,8 @@ class CachedData {
   /// Clear Cache
   /// Deletes all cached items from the cache
   static Future<void> clearCache() async {
-    bool debugMode = FireproofCloset().debugMode ?? false;
     LazyBox<CachedData> box = Hive.lazyBox<CachedData>(FireproofCloset.kDatabaseName);
     await box.deleteAll(box.keys);
-    if (debugMode) debugPrint("Cache deleted");
     return;
   }
 

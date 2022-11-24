@@ -7,15 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'cached_data.dart';
-import 'fireproof_closet_core.dart';
 
 /// Loads from cloud or cache a given Firebase Storage [Reference] as Uint8List
 ///
 /// This is essentially a different network downloading implementation of [FireproofImage]
 /// tailored to Firebase Storage
-///
-/// * [Image.fireproof] for a shorthand of an [Image] widget backed by [FireproofImage] ImageProvider
-/// // TODO: Create Image.fireproof named constructor extension on the Image class.
 @immutable
 class FireproofImage extends ImageProvider<FireproofImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
@@ -61,14 +57,8 @@ class FireproofImage extends ImageProvider<FireproofImage> {
 
   @override
   ImageStreamCompleter loadBuffer(FireproofImage key, DecoderBufferCallback decode) {
-    // Ownership of this controller is handed off to [_loadAsync]; it is that
-    // method's responsibility to close the controller's stream when the image
-    // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
-
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
-      chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: "FireproofImage(${storageRef.toString()})",
       informationCollector: () => <DiagnosticsNode>[
@@ -84,40 +74,23 @@ class FireproofImage extends ImageProvider<FireproofImage> {
   ) async {
     try {
       assert(key == this);
-      // For debug stats
-      late DateTime debugCacheStart;
-      late DateTime debugCacheEnd;
-      late DateTime debugFirebaseStorageStart;
-      late DateTime debugFirebaseStorageEnd;
 
-      bool debugMode = FireproofCloset().debugMode ?? false;
-
-      // First check if the image is in cache and if it's not expired
-      if (debugMode) debugCacheStart = DateTime.now();
+      // First attempt to retrieve the image from cache
       final Uint8List? cachedBytes = await CachedData.getFromCache(storageRef);
-      if (debugMode) debugCacheEnd = DateTime.now();
 
-      // If not in cache or expired, fetch the data from Firebase Storage AND cache the data
-      if (debugMode) debugFirebaseStorageStart = DateTime.now();
+      // If not in cache or expired, fetch the data from Firebase Storage
       final Uint8List? bytes = cachedBytes ?? await storageRef.getData(maxSize);
-      if (debugMode) debugFirebaseStorageEnd = DateTime.now();
-
-      if (debugMode) {
-        debugPrint("Cache stage : ${debugCacheEnd.difference(debugCacheStart).inMilliseconds}ms");
-        debugPrint("Firebase stage: ${debugFirebaseStorageEnd.difference(debugFirebaseStorageStart).inMilliseconds}ms");
-      }
 
       if (bytes == null) {
-        throw Exception('FireproofImage getData() returned null.');
+        throw Exception('No data in cache and FireproofImage getData() returned null.');
       }
 
       if (bytes.lengthInBytes == 0) {
-        throw Exception('FireproofImage is an empty file. 0 Bytes returned.');
+        throw Exception('FireproofImage is an empty file. 0 Bytes.');
       }
 
       // Cache the data if cachedBytes was null and cache == true
       if (cachedBytes == null && cache) {
-        if (debugMode) debugPrint("Caching: ${storageRef.fullPath}");
         CachedData.cacheBytes(storageRef: storageRef, bytes: bytes, cacheDuration: kDefaultDuration);
       }
 
@@ -134,6 +107,19 @@ class FireproofImage extends ImageProvider<FireproofImage> {
       rethrow;
     }
   }
+
+  // Required to utilize ImageProvider's hot memory caching system
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is FireproofImage && other.storageRef.fullPath == storageRef.fullPath && other.scale == scale;
+  }
+
+  // Required to utilize ImageProvider's hot memory caching system
+  @override
+  int get hashCode => Object.hash(storageRef.fullPath, scale);
 
   @override
   String toString() => '${objectRuntimeType(this, 'FireproofImage')}("${storageRef.toString()}", scale: $scale)';

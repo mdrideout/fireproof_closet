@@ -11,7 +11,6 @@ import 'constants.dart';
 /// Factory constructor always returns the same instance
 /// Instance parameters can only be set if they are null, and will use default values from the Factory constructor
 class FireproofCloset {
-  bool? debugMode;
   Duration? defaultDuration;
 
   /// Always return a singleton instance
@@ -21,9 +20,7 @@ class FireproofCloset {
   FireproofCloset._internal();
 
   /// Consumable Constructor
-  factory FireproofCloset({bool debugMode = false, defaultDuration = kDefaultDuration}) {
-    // Set null class parameters
-    _instance.debugMode ??= debugMode;
+  factory FireproofCloset({defaultDuration = kDefaultDuration}) {
     _instance.defaultDuration ??= defaultDuration;
 
     return _instance;
